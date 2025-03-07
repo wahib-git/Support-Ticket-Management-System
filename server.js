@@ -1,39 +1,44 @@
 const express = require("express");
 const connectDB = require("./config/db");
-const User = require("./models/User");
+const userRoutes = require("./routes/userRoutes");
+const { default: mongoose } = require("mongoose");
+require("dotenv").config();
 
+// Initialisation de l'application Express
 const app = express();
 
 // Connexion à la base de données
 connectDB();
 
-// ... autres middlewares et routes
+// Middleware pour parser les requêtes JSON
+app.use(express.json());
 
-app.use(express.json()); // Pour parser automatiquement les données JSON envoyées par le client.
-
-// Define a simple route
+// Route principale
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
 
-//const User = mongoose.model("User", userSchema);
-
-// Route pour créer un nouvel utilisateur
-app.post("/users", (req, res) => {
-  const newUser = new User(req.body);
-  newUser
-    .save(req.body) // Sauvegarde de l'utilisateur dans la base de données
-    .then((user) => res.status(201).json(user))
-    .catch((err) => res.status(400).json({ error: err.message }));
-});
-
-// Route pour obtenir tous les utilisateurs
-app.get("/users", (req, res) => {
-  User.find()
-    .then((users) => res.json(users))
-    .catch((err) => res.status(500).json({ error: err.message }));
-});
+// Import des routes utilisateurs
+app.use("/users", userRoutes);
 
 // Port d'écoute du serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI) //connect to the database
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.log("Failed to connect to MongoDB", err);
+  });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+
+
+
+
+
+
