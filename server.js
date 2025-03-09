@@ -4,24 +4,28 @@ const userRoutes = require("./routes/userRoutes");
 const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
+
+const authRoutes = require('./routes/auth');
+const ticketRoutes = require('./routes/tickets');
+const adminRoutes = require('./routes/admin');
+
+
 // Initialisation de l'application Express
+
 const app = express();
 
-// Connexion à la base de données
 connectDB();
 
 // Middleware pour parser les requêtes JSON
 app.use(express.json());
 
-// Route principale
-app.get("/", (req, res) => {
-  res.send("Hello, Express!");
-});
+// Déclaration des routes
+app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/admin', adminRoutes);
 
-// Import des routes utilisateurs
-app.use("/users", userRoutes);
 
-// Port d'écoute du serveur
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
 // Connect to MongoDB
