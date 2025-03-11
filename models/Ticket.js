@@ -17,6 +17,7 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       enum: ["urgent", "important", "mineur"],
       required: true,
+
     },
     status: {
       type: String,
@@ -37,5 +38,6 @@ const ticketSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.model("Ticket", ticketSchema);

@@ -32,4 +32,31 @@ router.get("/", async (req, res) => {
   }
 });
 
+
+/* // Route pour obtenir les agents selon leur spécialisation
+router.get('/agents', async (req, res) => {
+  try {
+    const { specialization } = req.query; // Récupère la spécialisation depuis la requête
+
+    if (!specialization) {
+      return res.status(400).json({ error: "Veuillez spécifier une spécialisation" });
+    }
+
+    // Rechercher uniquement les utilisateurs avec role "agent" et la spécialisation demandée
+    const agents = await User.find({ role: 'agent', specialization });
+
+    if (agents.length === 0) {
+      return res.status(404).json({ message: "Aucun agent trouvé pour cette catégorie" });
+    }
+
+    res.status(200).json(agents);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}); */
+
+
+
+
+
 module.exports = router;

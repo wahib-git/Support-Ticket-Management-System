@@ -13,4 +13,6 @@ const userSchema = new mongoose.Schema({
   // Autres attributs éventuels...
 });
 
+
 module.exports = mongoose.model('User', userSchema);
+
