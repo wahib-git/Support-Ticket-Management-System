@@ -28,7 +28,7 @@ const ticketSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    // L’agent assigné (assignation automatique selon la catégorie)
+   
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

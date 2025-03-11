@@ -15,6 +15,7 @@ const sendNotificationEmail = (to, subject, text) => {
     to,
     subject,
     text,
+    
   };
 
   transporter.sendMail(mailOptions, (error, info) => {

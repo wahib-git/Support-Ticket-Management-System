@@ -4,7 +4,7 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 
-// Route pour récupérer des statistiques simples
+
 router.get('/stats', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
     // Statistiques par catégorie (nombre de tickets)
@@ -29,14 +29,42 @@ router.get('/stats', authMiddleware, authorizeRoles('admin'), async (req, res) =
     if (resolvedTickets.length > 0) {
       topAgent = await User.findById(resolvedTickets[0]._id, 'email specialization');
     }
+    const stats = await Ticket.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$count' },
+          open: { $sum: { $cond: [{ $eq: ['$_id', 'open'] }, '$count', 0] } },
+          resolved: { $sum: { $cond: [{ $eq: ['$_id', 'resolved'] }, '$count', 0] } },
+          closed: { $sum: { $cond: [{ $eq: ['$_id', 'closed'] }, '$count', 0] } }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          open: 1,
+          resolved: 1,
+          closed: 1,
+          resolutionRate: { $divide: ['$resolved', '$total'] }
+        }
+      }
+    ]);
+  
 
-    res.json({ categoryStats, topAgent });
+    res.json({ categoryStats, topAgent , stats });
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la récupération des statistiques' });
   }
 });
 
-// Route pour lister tous les utilisateurs
+
 router.get('/users', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
     const users = await User.find().select('-password');
@@ -45,5 +73,7 @@ router.get('/users', authMiddleware, authorizeRoles('admin'), async (req, res) =
     res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
   }
 });
+
+
 
 module.exports = router;
