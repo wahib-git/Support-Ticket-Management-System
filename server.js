@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
 
-// Déclaration des routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/admin', adminRoutes);
