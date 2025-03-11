@@ -1,20 +1,22 @@
 const express = require("express");
 const connectDB = require("./config/db");
-const User = require("./models/User");
+
+
+const authRoutes = require('./routes/authRoutes');
+const ticketRoutes = require('./routes/TicketRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 
 const authRoutes = require('./routes/auth');
 const ticketRoutes = require('./routes/tickets');
 const adminRoutes = require('./routes/admin');
+
 
 const app = express();
 
 connectDB();
 
 app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello, Express!");
-});
 
 // Déclaration des routes
 app.use('/api/auth', authRoutes);
