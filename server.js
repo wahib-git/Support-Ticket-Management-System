@@ -1,9 +1,16 @@
 const express = require("express");
 const connectDB = require("./config/db");
 
+
 const authRoutes = require('./routes/authRoutes');
 const ticketRoutes = require('./routes/TicketRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+
+
+const authRoutes = require('./routes/auth');
+const ticketRoutes = require('./routes/tickets');
+const adminRoutes = require('./routes/admin');
+
 
 const app = express();
 

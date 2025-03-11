@@ -16,7 +16,8 @@ const ticketSchema = new mongoose.Schema(
     priority: {
       type: String,
       enum: ["urgent", "important", "mineur"],
-      default: "important",
+      required: true,
+
     },
     status: {
       type: String,
@@ -37,5 +38,6 @@ const ticketSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.model("Ticket", ticketSchema);
