@@ -80,7 +80,7 @@ router.patch('/:id/status', authMiddleware, authorizeRoles('agent'), async (req,
 });
 
 
-//  L'enseignant peut fermer un ticket (uniquement si son statut est "resolved")
+//  L'enseignant peut fermer un ticket
 
 router.patch('/:id/close', authMiddleware, authorizeRoles('enseignant'), async (req, res) => {
   try {

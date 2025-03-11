@@ -24,8 +24,6 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = async function (userPassword) {
   return bcryptjs.compare(userPassword, this.password);
 };
-  // Autres attributs éventuels...
-});
 
 
 module.exports = mongoose.model('User', userSchema);
