@@ -5,7 +5,9 @@ const User = require('../models/User');
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 const sendNotificationEmail = require('../utils/mailer');
 
+
 //  Création d'un ticket par l'enseignant
+
 router.post('/', authMiddleware, authorizeRoles('enseignant'), async (req, res) => {
   const { title, description, category, priority } = req.body;
   try {
@@ -19,6 +21,7 @@ router.post('/', authMiddleware, authorizeRoles('enseignant'), async (req, res) 
     });
 
     // trouver l'agent dont la spécialisation correspond à la catégorie
+
     const agent = await User.findOne({ role: 'agent', specialization: category });
     if (agent) {
       ticket.assignedTo = agent._id;
@@ -31,7 +34,9 @@ router.post('/', authMiddleware, authorizeRoles('enseignant'), async (req, res) 
   }
 });
 
+
 // L'agent met à jour le statut d'un ticket
+
 router.patch('/:id/status', authMiddleware, authorizeRoles('agent'), async (req, res) => {
   const { status } = req.body;
   const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
@@ -40,9 +45,8 @@ router.patch('/:id/status', authMiddleware, authorizeRoles('agent'), async (req,
     return res.status(400).json({ message: 'Statut invalide' });
   }
 
-  try {
+  try {    
 
-    
     let ticket = await Ticket.findById(req.params.id).populate({
       path: 'createdBy',
       select: 'email'
@@ -106,6 +110,7 @@ router.patch('/:id/close', authMiddleware, authorizeRoles('enseignant'), async (
   }
 });
 
+
 //  Un agent peut consulter la liste de ses tickets assignés
 
 router.get('/mytickets', authMiddleware, authorizeRoles('agent'), async (req, res) => {
@@ -116,6 +121,7 @@ router.get('/mytickets', authMiddleware, authorizeRoles('agent'), async (req, re
     res.status(500).json({ message: 'Erreur lors de la récupération des tickets' });
   }
 });
+
 
 //  Un admin peut consulter tous les tickets 
 
