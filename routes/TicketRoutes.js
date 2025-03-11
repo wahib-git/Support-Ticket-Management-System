@@ -30,7 +30,7 @@ router.post('/', authMiddleware, authorizeRoles('enseignant'), async (req, res) 
   }
 });
 
-// 2. L'agent met à jour le statut d'un ticket (par ex. passage à "in_progress" ou "resolved")
+// L'agent met à jour le statut d'un ticket (par ex. passage à "in_progress" ou "resolved")
 router.patch('/:id/status', authMiddleware, authorizeRoles('agent'), async (req, res) => {
   const { status } = req.body;
   const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
