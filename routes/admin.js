@@ -64,7 +64,7 @@ router.get('/stats', authMiddleware, authorizeRoles('admin'), async (req, res) =
   }
 });
 
-
+/* 
 router.get('/users', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
     const users = await User.find().select('-password');
@@ -73,7 +73,14 @@ router.get('/users', authMiddleware, authorizeRoles('admin'), async (req, res) =
     res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
   }
 });
-
-
+ */
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
+  }
+});
 
 module.exports = router;
