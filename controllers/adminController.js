@@ -8,7 +8,7 @@ const User = require("../models/User");
  *     summary: Get system statistics (Admin only)
  *     tags: [Admin]
  *     security:
- *       - BearerAuth: []
+ *       - BearerAuth: [] // Assurez-vous que cette ligne est présente
  *     responses:
  *       200:
  *         description: Statistics retrieved successfully

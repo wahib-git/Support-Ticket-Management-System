@@ -15,8 +15,22 @@ const swaggerOptions = {
         url: `http://localhost:${process.env.PORT || 3000}`,
       },
     ],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
   },
-  apis: [path.join(__dirname, "../routes/*.js")], // Ensure this path matches your route files
+  apis: [path.join(__dirname, "../controllers/*.js")], // Include controller files for Swagger annotations
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
