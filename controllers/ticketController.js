@@ -13,20 +13,28 @@ const sendNotificationEmail = require("../utils/mailer");
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               title:
  *                 type: string
+ *                 description: Title of the ticket
  *               description:
  *                 type: string
+ *                 description: Description of the issue
  *               category:
  *                 type: string
  *                 enum: [Infrastructure informatique, Entretien des locaux, Sécurité et sûreté]
+ *                 description: Category of the ticket
  *               priority:
  *                 type: string
  *                 enum: [urgent, important, mineur]
+ *                 description: Priority level of the ticket
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to attach to the ticket
  *     responses:
  *       201:
  *         description: Ticket created successfully
@@ -34,13 +42,14 @@ const sendNotificationEmail = require("../utils/mailer");
  *         description: Server error
  */
 exports.createTicket = async (req, res) => {
-  const { title, description, category, priority } = req.body;
+  const { title, description, category, priority, image } = req.body;
   try {
     let ticket = new Ticket({
       title,
       description,
       category,
       priority,
+      image,
       createdBy: req.user._id,
     });
 
