@@ -81,9 +81,39 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTicket"
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Title of the ticket"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the issue"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "Infrastructure informatique",
+                      "Entretien des locaux",
+                      "Sécurité et sûreté"
+                    ],
+                    "description": "Category of the ticket"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": ["urgent", "important", "mineur"],
+                    "description": "Priority level of the ticket"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file to attach to the ticket"
+                  }
+                },
+                "required": ["title", "description", "category", "priority"]
               }
             }
           }
@@ -91,6 +121,9 @@
         "responses": {
           "201": {
             "description": "Ticket created successfully"
+          },
+          "400": {
+            "description": "Validation error"
           },
           "500": {
             "description": "Server error"
@@ -233,10 +266,12 @@
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Title of the ticket"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Detailed description of the issue"
           },
           "category": {
             "type": "string",
@@ -244,11 +279,18 @@
               "Infrastructure informatique",
               "Entretien des locaux",
               "Sécurité et sûreté"
-            ]
+            ],
+            "description": "Category of the ticket"
           },
           "priority": {
             "type": "string",
-            "enum": ["urgent", "important", "mineur"]
+            "enum": ["urgent", "important", "mineur"],
+            "description": "Priority level of the ticket"
+          },
+          "image": {
+            "type": "string",
+            "format": "binary",
+            "description": "Image file for the ticket"
           }
         },
         "required": ["title", "description", "category", "priority"]

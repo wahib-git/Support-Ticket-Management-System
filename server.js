@@ -8,12 +8,19 @@ const authRoutes = require("./routes/authRoutes");
 const ticketRoutes = require("./routes/ticketsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
+const fs = require('fs');
 
 const app = express();
 
 connectDB();
 
 app.use(express.json());
+
+//dossier pour les uploads temporaires
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 // Configure CORS to allow requests from http://localhost:4200
 const corsOptions = {

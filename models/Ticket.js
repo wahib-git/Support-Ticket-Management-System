@@ -35,6 +35,10 @@ const ticketSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    image: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

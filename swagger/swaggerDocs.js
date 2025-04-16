@@ -30,7 +30,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: [path.join(__dirname, "../controllers/*.js")], // Include controller files for Swagger annotations
+  apis: [path.join(__dirname, "../controllers/*.js")], 
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
