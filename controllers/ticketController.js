@@ -1,6 +1,7 @@
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const sendNotificationEmail = require("../utils/mailer");
+const path = require("path");
 
 /**
  * @swagger
@@ -42,14 +43,20 @@ const sendNotificationEmail = require("../utils/mailer");
  *         description: Server error
  */
 exports.createTicket = async (req, res) => {
-  const { title, description, category, priority, image } = req.body;
+  const { title, description, category, priority } = req.body;
   try {
+    //console.log("Requête reçue :", req.body);
+    //console.log("Fichier téléchargé :", req.file);
+
+    // Récupérer le chemin de l'image téléchargée
+    const imagePath = req.file ? req.file.path : null;
+    
     let ticket = new Ticket({
       title,
       description,
       category,
       priority,
-      image,
+      image :imagePath,
       createdBy: req.user._id,
     });
 
@@ -60,10 +67,21 @@ exports.createTicket = async (req, res) => {
     if (agent) {
       ticket.assignedTo = agent._id;
     }
+    //console.log("Ticket à sauvegarder :", ticket);
 
     ticket = await ticket.save();
-    res.status(201).json(ticket);
+    // Ajouter l'URL complète de l'image dans la réponse
+    const ticketWithImageUrl = {
+      ...ticket._doc,
+      image: ticket.image
+        ? `${req.protocol}://${req.get("host")}/images/${path.basename(ticket.image)}`
+        : null,
+    };
+    //console.log("Ticket sauvegardé :", ticketWithImageUrl);
+
+    res.status(201).json(ticketWithImageUrl);
   } catch (error) {
+    //console.error("Erreur lors de la création du ticket :", error);
     res.status(500).json({ message: "Erreur lors de la création du ticket" });
   }
 };
