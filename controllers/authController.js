@@ -22,7 +22,10 @@ const jwt = require("jsonwebtoken");
  *                 type: string
  *               role:
  *                 type: string
- *                 enum: [admin, agent, enseignant]
+ *                 enum: [admin, agent, interlocuteur]
+ *               userProfile:
+ *                 type: string
+ *                 enum: [enseignant, eleve, personnel]
  *               specialization:
  *                 type: string
  *                 enum: [Infrastructure informatique, Entretien des locaux, Sécurité et sûreté]
@@ -36,7 +39,7 @@ const jwt = require("jsonwebtoken");
  */
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, specialization } = req.body;
+    const { name, email, password, userProfile, role, specialization } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -48,8 +51,13 @@ exports.register = async (req, res) => {
         .status(400)
         .json({ message: "La spécialisation est requise pour le rôle agent" });
     }
+    if (role === "interlocuteur" && !userProfile) {
+      return res
+        .status(400)
+        .json({ message: "Le profil utilisateur est requis pour le rôle interlocuteur" });
+    }
 
-    const user = new User({ name, email, password, role, specialization });
+    const user = new User({ name, email, password, userProfile, role, specialization });
     await user.save();
     res.status(201).json({ message: "Inscription réussie" });
   } catch (error) {
