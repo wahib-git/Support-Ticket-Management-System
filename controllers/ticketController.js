@@ -44,48 +44,46 @@ const path = require("path");
  */
 exports.createTicket = async (req, res) => {
   const { title, description, category, priority } = req.body;
-  try {
-    //console.log("Requête reçue :", req.body);
-    //console.log("Fichier téléchargé :", req.file);
 
-    // Récupérer le chemin de l'image téléchargée
-    const imagePath = req.file ? req.file.path : null;
-    
-    let ticket = new Ticket({
+  try {
+    const imageName = req.file ? path.basename(req.file.path) : null;
+    const ticketData = {
       title,
       description,
       category,
       priority,
-      image :imagePath,
+      image: imageName,
       createdBy: req.user._id,
-    });
-
-    const agent = await User.findOne({
-      role: "agent",
-      specialization: category,
-    });
-    if (agent) {
-      ticket.assignedTo = agent._id;
-    }
-    //console.log("Ticket à sauvegarder :", ticket);
-
-    ticket = await ticket.save();
-    // Ajouter l'URL complète de l'image dans la réponse
-    const ticketWithImageUrl = {
-      ...ticket._doc,
-      image: ticket.image
-        ? `${req.protocol}://${req.get("host")}/images/${path.basename(ticket.image)}`
-        : null,
     };
-    //console.log("Ticket sauvegardé :", ticketWithImageUrl);
 
-    res.status(201).json(ticketWithImageUrl);
+    // Trouver tous les agents ayant la spécialité correspondante
+    const agents = await User.find({ role: "agent", specialization: category });
+
+    if (agents.length > 0) {
+      // Calculer le nombre de tickets assignés à chaque agent
+      const agentTicketCounts = await Promise.all(
+        agents.map(async (agent) => {
+          const count = await Ticket.countDocuments({ assignedTo: agent._id });
+          return { agent, count };
+        })
+      );
+
+      // Trouver l'agent avec le minimum de tickets
+      const agentWithMinTickets = agentTicketCounts.reduce((min, current) =>
+        current.count < min.count ? current : min
+      );
+
+      ticketData.assignedTo = agentWithMinTickets.agent._id;
+    }
+
+    let ticket = await Ticket.create(ticketData);
+
+    res.status(201).json(ticket);
   } catch (error) {
-    //console.error("Erreur lors de la création du ticket :", error);
-    res.status(500).json({ message: "Erreur lors de la création du ticket" });
+    console.log(error);
+    res.status(500).send(error);
   }
 };
-
 /**
  * @swagger
  * /api/tickets/{id}/status:
@@ -143,7 +141,7 @@ exports.updateTicketStatus = async (req, res) => {
 
     if (!ticket.createdBy || !ticket.createdBy.email) {
       return res.status(500).json({
-        message: "L'enseignant associé au ticket n'a pas d'adresse e-mail.",
+        message: "L'interlocuteur associé au ticket n'a pas d'adresse e-mail.",
       });
     }
 
