@@ -46,7 +46,6 @@ exports.createTicket = async (req, res) => {
   const { title, description, category, priority } = req.body;
 
   try {
-    
     const imageName = req.file ? path.basename(req.file.path) : null;
     const ticketData = {
       title,
@@ -57,13 +56,24 @@ exports.createTicket = async (req, res) => {
       createdBy: req.user._id,
     };
 
-    const agent = await User.findOne({
-      role: "agent",
-      specialization: category,
-    });
+    // Trouver tous les agents ayant la spécialité correspondante
+    const agents = await User.find({ role: "agent", specialization: category });
 
-    if (agent) {
-      ticketData.assignedTo = agent._id;
+    if (agents.length > 0) {
+      // Calculer le nombre de tickets assignés à chaque agent
+      const agentTicketCounts = await Promise.all(
+        agents.map(async (agent) => {
+          const count = await Ticket.countDocuments({ assignedTo: agent._id });
+          return { agent, count };
+        })
+      );
+
+      // Trouver l'agent avec le minimum de tickets
+      const agentWithMinTickets = agentTicketCounts.reduce((min, current) =>
+        current.count < min.count ? current : min
+      );
+
+      ticketData.assignedTo = agentWithMinTickets.agent._id;
     }
 
     let ticket = await Ticket.create(ticketData);
@@ -131,7 +141,7 @@ exports.updateTicketStatus = async (req, res) => {
 
     if (!ticket.createdBy || !ticket.createdBy.email) {
       return res.status(500).json({
-        message: "L'enseignant associé au ticket n'a pas d'adresse e-mail.",
+        message: "L'interlocuteur associé au ticket n'a pas d'adresse e-mail.",
       });
     }
 

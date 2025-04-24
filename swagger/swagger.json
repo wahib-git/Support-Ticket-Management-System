@@ -237,7 +237,11 @@
           },
           "role": {
             "type": "string",
-            "enum": ["admin", "agent", "enseignant"]
+            "enum": ["admin", "agent", "interlocuteur"]
+          },
+          "userProfile": {
+            "type": "string",
+            "enum": ["enseignant", "eleve", "personnel"]
           },
           "specialization": {
             "type": "string",
