@@ -5,8 +5,12 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'agent', 'enseignant'], required: true },
- 
+  role: { type: String, enum: ['admin', 'agent', 'interlocuteur'], required: true },
+  userProfile: {
+    type: String,
+    enum: ['enseignant', 'etudient', 'personnel'],
+    required: function() { return this.role === 'interlocuteur' }
+  },  
   specialization: { 
     type: String, 
     enum: ['Infrastructure informatique', "Entretien des locaux", 'Sécurité et sûreté'],

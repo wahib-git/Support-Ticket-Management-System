@@ -8,7 +8,6 @@ const authRoutes = require("./routes/authRoutes");
 const ticketRoutes = require("./routes/ticketsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
-
 const app = express();
 
 connectDB();
@@ -24,7 +23,8 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Use cors with the options
 
 // Serve the static files
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "public/images/")));
+
 // Set the views engine
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");

@@ -1,6 +1,7 @@
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const sendNotificationEmail = require("../utils/mailer");
+const path = require("path");
 
 /**
  * @swagger
@@ -13,20 +14,28 @@ const sendNotificationEmail = require("../utils/mailer");
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               title:
  *                 type: string
+ *                 description: Title of the ticket
  *               description:
  *                 type: string
+ *                 description: Description of the issue
  *               category:
  *                 type: string
  *                 enum: [Infrastructure informatique, Entretien des locaux, Sécurité et sûreté]
+ *                 description: Category of the ticket
  *               priority:
  *                 type: string
  *                 enum: [urgent, important, mineur]
+ *                 description: Priority level of the ticket
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to attach to the ticket
  *     responses:
  *       201:
  *         description: Ticket created successfully
@@ -35,30 +44,46 @@ const sendNotificationEmail = require("../utils/mailer");
  */
 exports.createTicket = async (req, res) => {
   const { title, description, category, priority } = req.body;
+
   try {
-    let ticket = new Ticket({
+    const imageName = req.file ? path.basename(req.file.path) : null;
+    const ticketData = {
       title,
       description,
       category,
       priority,
+      image: imageName,
       createdBy: req.user._id,
-    });
+    };
 
-    const agent = await User.findOne({
-      role: "agent",
-      specialization: category,
-    });
-    if (agent) {
-      ticket.assignedTo = agent._id;
+    // Trouver tous les agents ayant la spécialité correspondante
+    const agents = await User.find({ role: "agent", specialization: category });
+
+    if (agents.length > 0) {
+      // Calculer le nombre de tickets assignés à chaque agent
+      const agentTicketCounts = await Promise.all(
+        agents.map(async (agent) => {
+          const count = await Ticket.countDocuments({ assignedTo: agent._id });
+          return { agent, count };
+        })
+      );
+
+      // Trouver l'agent avec le minimum de tickets
+      const agentWithMinTickets = agentTicketCounts.reduce((min, current) =>
+        current.count < min.count ? current : min
+      );
+
+      ticketData.assignedTo = agentWithMinTickets.agent._id;
     }
 
-    ticket = await ticket.save();
+    let ticket = await Ticket.create(ticketData);
+
     res.status(201).json(ticket);
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la création du ticket" });
+    console.log(error);
+    res.status(500).send(error);
   }
 };
-
 /**
  * @swagger
  * /api/tickets/{id}/status:
@@ -116,7 +141,7 @@ exports.updateTicketStatus = async (req, res) => {
 
     if (!ticket.createdBy || !ticket.createdBy.email) {
       return res.status(500).json({
-        message: "L'enseignant associé au ticket n'a pas d'adresse e-mail.",
+        message: "L'interlocuteur associé au ticket n'a pas d'adresse e-mail.",
       });
     }
 
