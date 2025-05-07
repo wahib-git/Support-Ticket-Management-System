@@ -1,20 +1,27 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-
-  
-// Récupération du token dans l'en-tête Authorization
-
-const token = req.header("Authorization");
+  const token = req.header("Authorization");
   if (!token) {
-    res.status(401).json({ message: 'Accès non autorisé, token manquant' });
+    return res
+      .status(401)
+      .json({ message: "Accès non autorisé, token manquant" });
   }
-  const decoded = jwt.verify(token.replace("Bearer ", ""),process.env.SECRET_KEY
-  );
-  req.user = decoded;
-
-  next();
-
+  try {
+    const decoded = jwt.verify(
+      token.replace("Bearer ", ""),
+      process.env.SECRET_KEY
+    );
+    req.user = decoded;
+    next();
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(401)
+        .json({ message: "Token expiré, veuillez vous reconnecter" });
+    }
+    return res.status(401).json({ message: "Token invalide" });
+  }
 };
 
 // Middleware pour autoriser l'accès en fonction des rôles
@@ -22,7 +29,11 @@ const token = req.header("Authorization");
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Vous n\'avez pas les droits pour accéder à cette ressource' });
+      return res
+        .status(403)
+        .json({
+          message: "Vous n'avez pas les droits pour accéder à cette ressource",
+        });
     }
     next();
   };

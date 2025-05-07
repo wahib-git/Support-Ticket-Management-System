@@ -25,7 +25,7 @@ const jwt = require("jsonwebtoken");
  *                 enum: [admin, agent, interlocuteur]
  *               userProfile:
  *                 type: string
- *                 enum: [enseignant, eleve, personnel]
+ *                 enum: [enseignant, etudient, personnel]
  *               specialization:
  *                 type: string
  *                 enum: [Infrastructure informatique, Entretien des locaux, Sécurité et sûreté]
@@ -39,7 +39,8 @@ const jwt = require("jsonwebtoken");
  */
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, userProfile, role, specialization } = req.body;
+    const { name, email, password, userProfile, role, specialization } =
+      req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -54,10 +55,20 @@ exports.register = async (req, res) => {
     if (role === "interlocuteur" && !userProfile) {
       return res
         .status(400)
-        .json({ message: "Le profil utilisateur est requis pour le rôle interlocuteur" });
+        .json({
+          message:
+            "Le profil utilisateur est requis pour le rôle interlocuteur",
+        });
     }
 
-    const user = new User({ name, email, password, userProfile, role, specialization });
+    const user = new User({
+      name,
+      email,
+      password,
+      userProfile,
+      role,
+      specialization,
+    });
     await user.save();
     res.status(201).json({ message: "Inscription réussie" });
   } catch (error) {
@@ -106,7 +117,8 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { _id: user._id, role: user.role, specialization: user.specialization },
-      process.env.SECRET_KEY
+      process.env.SECRET_KEY,
+      { expiresIn: "1h" } // Token expires in 1 hour
     );
 
     res.send({ message: "user logged in successful", token });
