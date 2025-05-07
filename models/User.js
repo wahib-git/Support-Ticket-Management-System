@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['admin', 'agent', 'interlocuteur'], required: true },
   userProfile: {
     type: String,
-    enum: ['enseignant', 'eleve', 'personnel'],
+    enum: ['enseignant', 'etudient', 'personnel'],
     required: function() { return this.role === 'interlocuteur' }
   },  
   specialization: { 

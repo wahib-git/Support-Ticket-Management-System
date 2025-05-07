@@ -241,7 +241,7 @@
           },
           "userProfile": {
             "type": "string",
-            "enum": ["enseignant", "eleve", "personnel"]
+            "enum": ["enseignant", "etudient", "personnel"]
           },
           "specialization": {
             "type": "string",
