@@ -123,7 +123,7 @@ exports.createTicket = async (req, res) => {
  */
 exports.updateTicketStatus = async (req, res) => {
   const { status } = req.body;
-  const validStatuses = ["open", "in_progress", "resolved", "closed"];
+  const validStatuses = ["open", "resolved", "closed"];
 
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ message: "Statut invalide" });
