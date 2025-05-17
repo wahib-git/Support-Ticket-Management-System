@@ -6,13 +6,11 @@ const { upload } = require('../middlewares/imageUpload');
 
 
 router.post("/", authMiddleware, authorizeRoles("interlocuteur"), upload.single('image'), ticketController.createTicket);
-//router.post("/create", upload.single('image'), ticketController.createTicket);
-
 router.patch("/:id/status", authMiddleware, authorizeRoles("agent"),  ticketController.updateTicketStatus);
 router.patch("/:id/close", authMiddleware, authorizeRoles("interlocuteur"), ticketController.closeTicket);
-router.get("/mytickets", authMiddleware, authorizeRoles("agent"), ticketController.getMyTickets);
 router.get("/", authMiddleware, authorizeRoles("admin"), ticketController.getAllTickets);
-
-//router.get("/", ticketController.getAllTickets);
-
+router.get("/mytickets", authMiddleware, authorizeRoles("interlocuteur", "agent"),ticketController.getMyTickets);
+router.get("/:id", authMiddleware, ticketController.getTicketById);
+router.delete("/:id", authMiddleware, authorizeRoles("interlocuteur"), ticketController.deleteTicket);
+router.patch("/:id", authMiddleware, authorizeRoles("interlocuteur"), upload.single('image'), ticketController.updateTicket);
 module.exports = router;
