@@ -8,7 +8,7 @@ const User = require("../models/User");
  *     summary: Get system statistics (Admin only)
  *     tags: [Admin]
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Statistics retrieved successfully
@@ -32,14 +32,27 @@ exports.getStats = async (req, res) => {
       { $sort: { count: -1 } },
       { $limit: 1 },
     ]);
+    const agents = await User.find({ role: "agent" }).select(
+      "name specialization"
+    );
 
-    let topAgent = null;
-    if (resolvedTickets.length > 0) {
-      topAgent = await User.findById(
-        resolvedTickets[0]._id,
-        "email specialization"
-      );
-    }
+    const agentsStats = await Promise.all(
+      agents.map(async (agent) => {
+        const assignedCount = await Ticket.countDocuments({
+          assignedTo: agent._id,
+        });
+        const resolvedCount = await Ticket.countDocuments({
+          assignedTo: agent._id,
+          status: "resolved",
+        });
+        return {
+          name: agent.name,
+          specialization: agent.specialization,
+          assignedCount,
+          resolvedCount,
+        };
+      })
+    );
 
     const stats = await Ticket.aggregate([
       {
@@ -81,7 +94,7 @@ exports.getStats = async (req, res) => {
       },
     ]);
 
-    res.json({ categoryStats, topAgent, stats, priorityStats });
+    res.json({ categoryStats, agentsStats, stats, priorityStats });
   } catch (error) {
     res
       .status(500)
@@ -113,3 +126,41 @@ exports.getUsers = async (req, res) => {
       .json({ message: "Erreur lors de la récupération des utilisateurs" });
   }
 };
+exports.deleteUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+    res.status(200).json({ message: "Utilisateur supprimé avec succès" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la suppression de l'utilisateur" });
+  }
+};
+
+/**
+ * @swagger
+ * /api/admin/users/{userId}:
+ *   delete:
+ *     summary: Delete a user (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         description: ID of the user to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
