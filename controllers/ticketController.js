@@ -141,7 +141,7 @@ exports.createTicket = async (req, res) => {
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [open, in_progress, resolved, closed]
+ *                 enum: [open, resolved, closed]
  *     responses:
  *       200:
  *         description: Ticket status updated successfully
