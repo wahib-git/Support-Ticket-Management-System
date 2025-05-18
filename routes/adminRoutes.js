@@ -5,8 +5,6 @@ const adminController = require("../controllers/adminController");
 
 router.get("/stats", authMiddleware, authorizeRoles("admin"), adminController.getStats);
 router.get("/users", authMiddleware, authorizeRoles("admin"), adminController.getUsers);
-
-
-//router.get("/users", adminController.getUsers);
+router.delete("/users/:userId", authMiddleware, authorizeRoles("admin"), adminController.deleteUser);
 
 module.exports = router;

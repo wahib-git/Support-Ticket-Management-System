@@ -70,11 +70,27 @@ exports.register = async (req, res) => {
       specialization,
     });
     await user.save();
-    res.status(201).json({ message: "Inscription réussie" });
-  } catch (error) {
+        //send token
+    const token = jwt.sign(
+      { _id: user._id, role: user.role, specialization: user.specialization },
+      process.env.SECRET_KEY,
+      { expiresIn: "1h" } // Token expires in 1 hour
+    );
+    res.status(201).json({
+      message: "Inscription réussie",
+      token,
+    });
+  }
+  catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
   }
 };
+
+
+
 
 /**
  * @swagger
