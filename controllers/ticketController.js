@@ -84,6 +84,39 @@ exports.createTicket = async (req, res) => {
     res.status(500).send(error);
   }
 };
+ //update the ticket and its image
+ exports.updateTicket = async (req, res) => {
+  const { title, description, category, priority } = req.body;
+
+  try {
+    let ticket = await Ticket.findById(req.params.id);
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket non trouvé" });
+    }
+
+    if (ticket.createdBy.toString() !== req.user._id) {
+      return res.status(403).json({
+        message: "Vous n'avez pas l'autorisation de modifier ce ticket",
+      });
+    }
+
+    ticket.title = title;
+    ticket.description = description;
+    ticket.category = category;
+    ticket.priority = priority;
+
+    if (req.file) {
+      ticket.image = path.basename(req.file.path);
+    }
+
+    ticket = await ticket.save();
+    res.json(ticket);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la mise à jour du ticket" });
+  }
+};
+
 /**
  * @swagger
  * /api/tickets/{id}/status:
@@ -108,7 +141,7 @@ exports.createTicket = async (req, res) => {
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [open, in_progress, resolved, closed]
+ *                 enum: [open, resolved, closed]
  *     responses:
  *       200:
  *         description: Ticket status updated successfully
@@ -123,7 +156,7 @@ exports.createTicket = async (req, res) => {
  */
 exports.updateTicketStatus = async (req, res) => {
   const { status } = req.body;
-  const validStatuses = ["open", "in_progress", "resolved", "closed"];
+  const validStatuses = ["open", "resolved", "closed"];
 
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ message: "Statut invalide" });
@@ -195,6 +228,8 @@ exports.updateTicketStatus = async (req, res) => {
  *       500:
  *         description: Server error
  */
+
+
 exports.closeTicket = async (req, res) => {
   try {
     let ticket = await Ticket.findById(req.params.id);
@@ -224,25 +259,34 @@ exports.closeTicket = async (req, res) => {
 /**
  * @swagger
  * /api/tickets/mytickets:
- *   get:
- *     summary: Get tickets assigned to the logged-in agent
- *     tags: [Tickets]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of assigned tickets
- *       500:
- *         description: Server error
- */
+ *   get: 
+ *    summary: Get tickets assigned to the user
+ *   tags: [Tickets]
+ *   security:
+ *    - BearerAuth: []
+ *   responses:
+ *    200:
+ *     description: List of tickets assigned to the user
+ *    403:
+ *     description: Unauthorized
+ *    500:
+ *     description: Server error
+ */ 
+
+
 exports.getMyTickets = async (req, res) => {
   try {
-    const tickets = await Ticket.find({ assignedTo: req.user._id });
+    let tickets;
+    if (req.user.role === "agent") {
+      tickets = await Ticket.find({ assignedTo: req.user._id });
+    } else if (req.user.role === "interlocuteur") {
+      tickets = await Ticket.find({ createdBy: req.user._id });
+    } else {
+      return res.status(403).json({ message: "Vous n'avez pas les droits pour accéder à cette ressource" });
+    }
     res.json(tickets);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la récupération des tickets" });
+    res.status(500).json({ message: "Erreur lors de la récupération des tickets" });
   }
 };
 
@@ -272,3 +316,82 @@ exports.getAllTickets = async (req, res) => {
       .json({ message: "Erreur lors de la récupération des tickets" });
   }
 };
+/**
+ * @swagger
+ * /api/tickets/{id}:
+ *   get:
+ *     summary: Get a ticket by ID
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Ticket ID
+ *     responses:
+ *       200:
+ *         description: Ticket details
+ *       404:
+ *         description: Ticket not found
+ *       500:
+ *         description: Server error
+ */
+exports.getTicketById = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id)
+      .populate("createdBy", "email role")
+      .populate("assignedTo", "email specialization");
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket non trouvé" });
+    }
+    res.json(ticket);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération du ticket" });
+  }
+};
+
+/**
+ * @swagger
+ * /api/tickets/{id}:
+ *   delete:
+ *     summary: Delete a ticket (Interlocuteur only)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Ticket ID
+ *     responses:
+ *       200:
+ *         description: Ticket deleted successfully
+ *       404:
+ *         description: Ticket not found
+ *       500:
+ *         description: Server error
+ */
+exports.deleteTicket = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket non trouvé" });
+    }
+
+    if (ticket.createdBy.toString() !== req.user._id) {
+      return res.status(403).json({
+        message: "Vous n'avez pas l'autorisation de supprimer ce ticket",
+      });
+    }
+
+    await ticket.remove();
+    res.json({ message: "Ticket supprimé avec succès" });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la suppression du ticket" });
+  }
+}

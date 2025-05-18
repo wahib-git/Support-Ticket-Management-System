@@ -23,7 +23,7 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Use cors with the options
 
 // Serve the static files
-app.use("/images", express.static(path.join(__dirname, "public/images/")));
+app.use("/", express.static(path.join(__dirname, "public/")));
 
 // Set the views engine
 app.set("views", path.join(__dirname, "views"));

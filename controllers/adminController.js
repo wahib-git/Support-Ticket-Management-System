@@ -72,8 +72,16 @@ exports.getStats = async (req, res) => {
         },
       },
     ]);
+    const priorityStats = await Ticket.aggregate([
+      {
+        $group: {
+          _id: "$priority",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-    res.json({ categoryStats, topAgent, stats });
+    res.json({ categoryStats, topAgent, stats, priorityStats });
   } catch (error) {
     res
       .status(500)
