@@ -1,3 +1,3 @@
 module.exports = {
-  testMatch: ["**/tests/**/*.integration.test.js"]
+  testMatch: ["**/tests/**/*.functional.test.js"]
 };

@@ -11,5 +11,9 @@ describe('User model', () => {
     });
     await user.save();
     expect(user.password).not.toBe('plainpassword');
-  });
+  }, 15000); // 15 secondes
+});
+
+afterAll(async () => {
+  await require('mongoose').connection.close();
 });

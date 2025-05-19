@@ -10,7 +10,10 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
-connectDB();
+(async () => {
+  await connectDB();
+  // ...le reste de ton initialisation serveur...
+})();
 
 app.use(express.json());
 
