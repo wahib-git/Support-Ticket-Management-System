@@ -10,8 +10,6 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
-connectDB();
-
 app.use(express.json());
 
 // Configure CORS to allow requests from http://localhost:4200
@@ -20,7 +18,7 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
-app.use(cors(corsOptions)); // Use cors with the options
+app.use(cors(corsOptions));
 
 // Serve the static files
 app.use("/", express.static(path.join(__dirname, "public/")));
@@ -37,10 +35,16 @@ app.get("/", (req, res) => {
 const setupSwagger = require("./swagger/swaggerDocs");
 setupSwagger(app);
 
-// Routes 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/admin", adminRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+if (process.env.NODE_ENV !== "test") {
+  connectDB().then(() => {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+  });
+}
+
+module.exports = app;
