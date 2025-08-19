@@ -6,7 +6,9 @@
     "start": "nodemon server.js",
     "test": "jest --testMatch '**/tests/**/*.unit.test.js'",
     "test:integration": "jest --config jest.integration.config.js",
-    "test:functional": "jest --config jest.functional.config.js"
+    "test:functional": "jest --config jest.functional.config.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,8 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
     "jest": "^29.7.0",
     "supertest": "^7.1.1"
   }
