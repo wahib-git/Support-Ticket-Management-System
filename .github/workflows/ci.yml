@@ -53,22 +53,30 @@ jobs:
       #     npm run test:integration
       #     npm run test:functional
       
-    sonarcloud:
-      runs-on: ubuntu-latest  
-      steps:  
-        - name: Checkout code
-          uses: actions/checkout@v5
-          with:
-            fetch-depth: 0  
+    # sonarcloud:
+    #   runs-on: ubuntu-latest  
+    #   steps:  
+    #     - name: Checkout code
+    #       uses: actions/checkout@v5
+    #       with:
+    #         fetch-depth: 0  
 
-        - name: SonarCloud Scan
-          uses: SonarSource/sonarqube-scan-action@v5.3.0
-          env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
-            GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-          with:
-            args: >
-              -Dsonar.organization=wahib-git
-              -Dsonar.projectKey=Support-Ticket-Management-System
-
-
+    #     - name: SonarCloud Scan
+    #       uses: SonarSource/sonarqube-scan-action@v5.3.0
+    #       env:
+    #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+    #         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+    #       with:
+    #         args: >
+    #           -Dsonar.organization=wahib-git
+    #           -Dsonar.projectKey=Support-Ticket-Management-System
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
