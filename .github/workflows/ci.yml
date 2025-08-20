@@ -44,4 +44,7 @@ jobs:
       - name: Run Unit Tests
         env:
           MONGODB_URI_TEST: ${{ secrets.MONGODB_URI_TEST }}
-        run: npm test
+        run: |
+          npm test
+          npm test:integration
+          npm test:functional
