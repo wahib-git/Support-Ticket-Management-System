@@ -46,5 +46,5 @@ jobs:
           MONGODB_URI_TEST: ${{ secrets.MONGODB_URI_TEST }}
         run: |
           npm test
-          npm test:integration
-          npm test:functional
+          npm run test:integration
+          npm run test:functional
