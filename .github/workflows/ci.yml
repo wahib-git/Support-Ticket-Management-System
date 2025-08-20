@@ -57,5 +57,10 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5.3.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=wahib-git
+            -Dsonar.projectKey=Support-Ticket-Management-System
 
 
