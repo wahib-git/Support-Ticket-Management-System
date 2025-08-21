@@ -114,7 +114,7 @@ jobs:
 
         - uses: dependency-check/Dependency-Check_Action@main
           with:
-            project: "Support Ticket Management System"
+            project: "Support-Ticket-Management-System"
             path: "."
             format: "HTML"
             out: "reports"
