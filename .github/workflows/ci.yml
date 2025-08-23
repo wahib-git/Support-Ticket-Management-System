@@ -124,26 +124,38 @@ jobs:
     #         name: dependency-check-report
     #         path: reports/dependency-check-report.html
 
-    docker-build-and-push:
-      name: Build and Push Docker Image
-      runs-on: ubuntu-latest
-    #  needs: [test]
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v5
-          with:
-            fetch-depth: 0  
 
-        - name: Log in to Docker Hub
-          uses: docker/login-action@v3
-          with:
-            username: ${{ secrets.DOCKER_HUB_USERNAME }}
-            password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+  docker-build-and-scan:
+    name: Build, Scan & Push Docker Image
+    runs-on: ubuntu-latest
 
-        - name: Build and push Docker image
-          uses: docker/build-push-action@v6
-          with:
-            context: .
-            push: true
-            tags: ${{ secrets.DOCKER_HUB_USERNAME }}/support-ticket-management-system-backend:latest
-            file: ./Dockerfile  
+    steps:
+      #  Récupération du code
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      #  Build de l’image
+      - name: Build Docker image
+        run: |
+          IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
+          docker build -t $IMAGE .
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      #  Scan de l’image avec Trivy
+      - name: Trivy scan Docker image
+        uses: aquasecurity/trivy-action@0.32.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          severity: CRITICAL,HIGH
+          format: 'table'
+          ignore-unfixed: true
+
+      #  Connexion Docker Hub (seulement si scan OK)
+      - name: Log in to Docker Hub
+        if: success()
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+      #  Push sur Docker Hub
+      - name: Push Docker image
+        if: success()
+        run: docker push ${{ env.IMAGE }}
