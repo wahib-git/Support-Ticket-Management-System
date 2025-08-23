@@ -153,7 +153,7 @@ jobs:
       #  Connexion Docker Hub (seulement si scan OK)
       - name: Log in to Docker Hub
         if: success()
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       #  Push sur Docker Hub
       - name: Push Docker image
