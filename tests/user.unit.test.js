@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
+require("dotenv").config();
+
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGODB_URI_TEST, {});

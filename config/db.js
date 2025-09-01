@@ -5,8 +5,9 @@ const connectDB = async () => {
   try {
     // Utilise la base de test si NODE_ENV === 'test'
     const uri = process.env.NODE_ENV === 'test' ? process.env.MONGODB_URI_TEST : process.env.MONGODB_URI;
+    const nodeEnv = process.env.NODE_ENV;
     await mongoose.connect(uri, {});
-    console.log("Connecté à MongoDB avec succès");
+    console.log(`Connecté à MongoDB avec succès`, `environnement: ${nodeEnv}`);
   } catch (error) {
     console.error("Erreur de connexion à MongoDB:", error.message);
     process.exit(1);
