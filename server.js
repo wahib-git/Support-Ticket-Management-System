@@ -3,7 +3,6 @@ const connectDB = require("./config/db");
 const User = require("./models/User");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const ticketRoutes = require("./routes/ticketsRoutes");
@@ -44,8 +43,7 @@ app.use("/api/admin", adminRoutes);
 if (process.env.NODE_ENV !== "test") {
   connectDB().then(() => {
     const port = process.env.PORT || 3000;
-    const nodeEnv = process.env.NODE_ENV ;
-    app.listen(port, () => console.log(`Serveur démarré sur le port ${port}`, `environnement: ${nodeEnv}`)
+    app.listen(port, () => console.log(`Serveur démarré sur le port ${port}`)
   );
   });
 }
