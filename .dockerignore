@@ -7,7 +7,7 @@ yarn-error.log
 coverage
 *.test.js
 tests/
-jest.config.js
+jest.unit.config.js
 jest.integration.config.js
 jest.functional.config.js
 
@@ -39,3 +39,8 @@ docker-compose.yml
 
 # github
 .github/
+.git/
+.gitignore
+.gitlab-ci.yml
+eslint.config.mjs
+README.md
