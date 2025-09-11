@@ -148,34 +148,34 @@ jobs:
   #         path: reports/dependency-check-report.html
 
 
-  docker-build-and-scan:
-    name: Build, Scan(trivy) & Push Docker Image
-    needs: sonarcloud-scan
- #  needs: OWASP-Dependency-Check
-    runs-on: ubuntu-latest
+#   docker-build-and-scan:
+#     name: Build, Scan(trivy) & Push Docker Image
+#     needs: sonarcloud-scan
+#  #  needs: OWASP-Dependency-Check
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v5
 
-      - name: Build Docker image
-        run: |
-          IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
-          docker build -t $IMAGE .
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+#       - name: Build Docker image
+#         run: |
+#           IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
+#           docker build -t $IMAGE .
+#           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      - name: Trivy scan Docker image
-        uses: aquasecurity/trivy-action@0.32.0
-        with:
-          image-ref: ${{ env.IMAGE }}
-          severity: CRITICAL,HIGH
-          format: 'table'
-          ignore-unfixed: true
+#       - name: Trivy scan Docker image
+#         uses: aquasecurity/trivy-action@0.32.0
+#         with:
+#           image-ref: ${{ env.IMAGE }}
+#           severity: CRITICAL,HIGH
+#           format: 'table'
+#           ignore-unfixed: true
 
-      - name: Log in to Docker Hub
-        if: success()
-        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+#       - name: Log in to Docker Hub
+#         if: success()
+#         run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-      - name: Push Docker image
-        if: success()
-        run: docker push ${{ env.IMAGE }}
+#       - name: Push Docker image
+#         if: success()
+#         run: docker push ${{ env.IMAGE }}

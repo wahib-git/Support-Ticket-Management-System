@@ -120,19 +120,6 @@ exports.createTicket = async (req, res) => {
   }
 
   let { title, description, category, priority } = req.body;
-  // ✅ Nettoyage et normalisation
-  title = String(title).trim();
-  description = String(description).trim();
-  category = String(category).trim();
-  priority = String(priority).trim();
-
-    // ✅ Whitelist supplémentaire (anti-injection / SonarQube compliant)
-  if (!allowedCategories.includes(category)) {
-    return res.status(400).json({ message: "Catégorie invalide" });
-  }
-  if (!allowedPriorities.includes(priority)) {
-    return res.status(400).json({ message: "Priorité invalide" });
-  }  
 
   try {
     let ticket = await Ticket.findById(req.params.id);
