@@ -26,12 +26,7 @@ exports.getStats = async (req, res) => {
       },
     ]);
 
-    const resolvedTickets = await Ticket.aggregate([
-      { $match: { status: "resolved" } },
-      { $group: { _id: "$assignedTo", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 1 },
-    ]);
+   
     const agents = await User.find({ role: "agent" }).select(
       "name specialization"
     );

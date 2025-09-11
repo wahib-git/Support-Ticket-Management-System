@@ -2,6 +2,7 @@ const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const sendNotificationEmail = require("../utils/mailer");
 const path = require("path");
+const { validationResult } = require("express-validator");
 
 /**
  * @swagger
@@ -43,9 +44,14 @@ const path = require("path");
  *         description: Server error
  */
 exports.createTicket = async (req, res) => {
-  const { title, description, category, priority } = req.body;
 
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { title, description, category, priority } = req.body;
+
     const imageName = req.file ? path.basename(req.file.path) : null;
     const ticketData = {
       title,
@@ -86,6 +92,11 @@ exports.createTicket = async (req, res) => {
 };
  //update the ticket and its image
  exports.updateTicket = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { title, description, category, priority } = req.body;
 
   try {
@@ -116,7 +127,7 @@ exports.createTicket = async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la mise à jour du ticket" });
   }
 };
-
+   
 /**
  * @swagger
  * /api/tickets/{id}/status:

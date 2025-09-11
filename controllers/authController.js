@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 /**
  * @swagger
@@ -39,10 +40,15 @@ const jwt = require("jsonwebtoken");
  */
 exports.register = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    } 
+
     const { name, email, password, userProfile, role, specialization } =
       req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(401).json({ message: "L'utilisateur existe déjà" });
     }
@@ -63,7 +69,7 @@ exports.register = async (req, res) => {
 
     const user = new User({
       name,
-      email,
+      email: email.toLowerCase(),
       password,
       userProfile,
       role,
@@ -120,25 +126,38 @@ exports.register = async (req, res) => {
  *         description: Server error
  */
 exports.login = async (req, res) => {
+  
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(401).send({ message: "Invalid credentials" });
     }
-    const isHavePassword = await user.comparePassword(password);
-    if (!isHavePassword) {
-      return res.status(400).send({ message: "Invalid credentials" });
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).send({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
       { _id: user._id, role: user.role, specialization: user.specialization },
       process.env.SECRET_KEY,
-      { expiresIn: "1h" } // Token expires in 1 hour
+      { expiresIn: "1h" }
     );
 
-    res.send({ message: "user logged in successful", token });
+    res.status(200).send({ message: "User logged in successfully", token });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("Login error:", error);
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+    
+    return res.status(500).json({ message: "Server error" });
   }
+    
 };
