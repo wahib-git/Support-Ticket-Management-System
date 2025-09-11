@@ -4,6 +4,14 @@ const sendNotificationEmail = require("../utils/mailer");
 const path = require("path");
 const { validationResult } = require("express-validator");
 
+// Whitelists
+const allowedCategories = [
+  "Infrastructure informatique",
+  "Entretien des locaux",
+  "Sécurité et sûreté",
+];
+const allowedPriorities = ["urgent", "important", "mineur"];
+
 /**
  * @swagger
  * /api/tickets:
@@ -50,7 +58,21 @@ exports.createTicket = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { title, description, category, priority } = req.body;
+    let { title, description, category, priority } = req.body;
+   // ✅ Nettoyage et normalisation
+    title = String(title).trim();
+    description = String(description).trim();
+    category = String(category).trim();
+    priority = String(priority).trim();
+
+    // ✅ Whitelist supplémentaire (anti-injection / SonarQube compliant)
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({ message: "Catégorie invalide" });
+    }
+    if (!allowedPriorities.includes(priority)) {
+      return res.status(400).json({ message: "Priorité invalide" });
+    }
+
 
     const imageName = req.file ? path.basename(req.file.path) : null;
     const ticketData = {
@@ -97,7 +119,20 @@ exports.createTicket = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { title, description, category, priority } = req.body;
+  let { title, description, category, priority } = req.body;
+  // ✅ Nettoyage et normalisation
+  title = String(title).trim();
+  description = String(description).trim();
+  category = String(category).trim();
+  priority = String(priority).trim();
+
+    // ✅ Whitelist supplémentaire (anti-injection / SonarQube compliant)
+  if (!allowedCategories.includes(category)) {
+    return res.status(400).json({ message: "Catégorie invalide" });
+  }
+  if (!allowedPriorities.includes(priority)) {
+    return res.status(400).json({ message: "Priorité invalide" });
+  }  
 
   try {
     let ticket = await Ticket.findById(req.params.id);

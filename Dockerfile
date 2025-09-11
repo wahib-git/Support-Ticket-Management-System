@@ -15,6 +15,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
+# Changer l’utilisateur root par 'node'
+USER node
 
 EXPOSE 3000
 
