@@ -92,7 +92,7 @@ jobs:
           path: coverage/
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.3.0
+        uses: SonarSource/sonarqube-scan-action@v5.3.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
