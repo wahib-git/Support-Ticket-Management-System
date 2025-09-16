@@ -3,6 +3,7 @@ const connectDB = require("./config/db");
 const User = require("./models/User");
 const cors = require("cors");
 const path = require("path");
+const client = require("prom-client");
 
 const authRoutes = require("./routes/authRoutes");
 const ticketRoutes = require("./routes/ticketsRoutes");
@@ -34,6 +35,17 @@ app.get("/", (req, res) => {
 
 const setupSwagger = require("./swagger/swaggerDocs");
 setupSwagger(app);
+
+
+// Metrics endpoint
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ timeout: 5000 });
+// Expose the metrics at /metrics endpoint
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
+});
+
 
 // Routes
 app.use("/api/auth", authRoutes);
