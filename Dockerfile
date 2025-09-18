@@ -1,32 +1,14 @@
-# -------- Base image --------
-FROM node:22-alpine AS base
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-
-# -------- Dependencies --------
-FROM base AS deps
 RUN npm ci --omit=dev
 
-# -------- Release image --------
-FROM node:22-alpine AS release
+FROM node:20-alpine AS runner
 WORKDIR /app
-
-# Créer un user non-root "nodeuser"
-RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
-
-
-# Copie uniquement node_modules de deps
 COPY --from=deps /app/node_modules ./node_modules
-
 COPY . .
-
-
-# Changer propriétaire des fichiers à nodeuser
-RUN chown -R nodeuser:nodejs /app
-
-# Utiliser l'utilisateur non-root
-USER nodeuser
+RUN chown -R node:node /app/src/public
 
 EXPOSE 3000
-
+USER node
 CMD ["npm", "start"]

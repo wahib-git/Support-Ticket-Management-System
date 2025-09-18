@@ -1,46 +1,11 @@
-# Node.js
+.git
+.gitlab-ci.yml
 node_modules
 npm-debug.log
-yarn-error.log
-
-# Tests
-coverage
-*.test.js
-tests/
-jest.unit.config.js
-jest.integration.config.js
-jest.functional.config.js
-
-# Logs
-*.log
-logs/
-debug.log
-
-# IDE / éditeurs
-.vscode/
-.idea/
-*.swp
-
-# Systèmes
-.DS_Store
-Thumbs.db
-
-# Env files (NE PAS exposer !)
-.env
-.env.local
-.env.test
-.env.development
-.env.production
-
-# Docker
-.dockerignore
 Dockerfile
-docker-compose.yml
-
-# github
-.github/
-.git/
-.gitignore
-.gitlab-ci.yml
-eslint.config.mjs
+.dockerignore
+.env
+coverage
+tests
+docs
 README.md
