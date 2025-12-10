@@ -2,49 +2,49 @@ name: Backend CI
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
 
-  # Gitleaks-Scan:
-  #   name: Gitleaks scan
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v5
-  #       with:
-  #         fetch-depth: 0
-  #     - uses: gitleaks/gitleaks-action@v2
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+  Gitleaks-Scan:
+    name: Gitleaks scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
 
-  # lint:
-  #   name: Lint Code Base (ESLint)
-  #   runs-on: ubuntu-latest
-  #   needs: Gitleaks-Scan
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v5
+  lint:
+    name: Lint Code Base (ESLint)
+    runs-on: ubuntu-latest
+    needs: Gitleaks-Scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Run Linter
-  #       run: npm run lint
+      - name: Run Linter
+        run: npm run lint
 
   tests:
     name: Run Unit, Integration & functional Tests
     runs-on: ubuntu-latest
-    #needs: lint
+    needs: lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -102,80 +102,79 @@ jobs:
             -Dsonar.projectKey=Support-Ticket-Management-System
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info 
 
-  # Trivy-Scan:
-  #   name: Trivy file system Scan
-  #   needs: sonarcloud-scan
+  Trivy-Scan:
+    name: Trivy file system Scan
+    needs: sonarcloud-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.32.0
+        with:
+          scan-type: 'fs'
+          severity: 'CRITICAL,HIGH'
+
+  OWASP-Dependency-Check:
+    name: OWASP Dependency Check
+    needs: Trivy-Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: dependency-check/Dependency-Check_Action@1.1.0
+        with:
+          project: "Support-Ticket-Management-System"
+          path: "."
+          format: "HTML"
+
+      - name: Upload Dependency-Check report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/dependency-check-report.html
+
+
+  # docker-build-and-scan:
+  #   name: Build, Scan(trivy) & Push Docker Image
+  #   needs: OWASP-Dependency-Check
   #   runs-on: ubuntu-latest
+
   #   steps:
-  #     - uses: actions/checkout@v5
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Run Trivy vulnerability scanner in repo mode
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v5
+
+  #     - name: Build Docker image
+  #       run: |
+  #         IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
+  #         docker build -t $IMAGE .
+  #         echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+  #     - name: Trivy scan Docker image
   #       uses: aquasecurity/trivy-action@0.32.0
   #       with:
-  #         scan-type: 'fs'
-  #         severity: 'CRITICAL,HIGH'
+  #         image-ref: ${{ env.IMAGE }}
+  #         severity: CRITICAL,HIGH
+  #         format: 'table'
+  #         ignore-unfixed: true
 
-  # OWASP-Dependency-Check:
-  #   name: OWASP Dependency Check
-  #   needs: Trivy-Scan
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v5
-  #       with:
-  #         fetch-depth: 0 
+  #     - name: Log in to Docker Hub
+  #       if: success()
+  #       run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: 'npm'
-
-  #     - name: Install dependencies
-  #       run: npm ci
-
-  #     - uses: dependency-check/Dependency-Check_Action@1.1.0
-  #       with:
-  #         project: "Support-Ticket-Management-System"
-  #         path: "."
-  #         format: "HTML"
-
-  #     - name: Upload Dependency-Check report
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: dependency-check-report
-  #         path: reports/dependency-check-report.html
-
-
-#   docker-build-and-scan:
-#     name: Build, Scan(trivy) & Push Docker Image
-#     needs: sonarcloud-scan
-#  #  needs: OWASP-Dependency-Check
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v5
-
-#       - name: Build Docker image
-#         run: |
-#           IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
-#           docker build -t $IMAGE .
-#           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-
-#       - name: Trivy scan Docker image
-#         uses: aquasecurity/trivy-action@0.32.0
-#         with:
-#           image-ref: ${{ env.IMAGE }}
-#           severity: CRITICAL,HIGH
-#           format: 'table'
-#           ignore-unfixed: true
-
-#       - name: Log in to Docker Hub
-#         if: success()
-#         run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-#       - name: Push Docker image
-#         if: success()
-#         run: docker push ${{ env.IMAGE }}
+  #     - name: Push Docker image
+  #       if: success()
+  #       run: docker push ${{ env.IMAGE }}
