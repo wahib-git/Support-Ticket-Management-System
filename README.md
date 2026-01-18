@@ -1,4 +1,3 @@
-# Hi Legends 👋
 # <p align="center">Gestion de Tickets de Support - Backend</p>
 
 ## Description
