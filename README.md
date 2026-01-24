@@ -1,5 +1,5 @@
 # <p align="center">Gestion de Tickets de Support - Backend</p>
-
+[![Backend CI](https://github.com/wahib-bachoua/Support-Ticket-Management-System/actions/workflows/ci.yml/badge.svg)](https://github.com/wahib-bachoua/Support-Ticket-Management-System/actions/workflows/ci.yml)
 ## Description
 
 Ce projet est une application backend développée en NodeJS avec ExpressJS et MongoDB, destinée à la gestion des tickets de support dans une école. Il permet aux enseignants de créer des tickets pour demander de l’aide sur différents sujets, qui sont automatiquement assignés à des agents spécialisés.
